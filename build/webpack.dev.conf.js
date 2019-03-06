@@ -9,6 +9,14 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
 const portfinder = require('portfinder')
+const express = require('express')  // nodejs 开发框架express,用来简化操作
+const app = express() // 创建express实例
+var appData = require('../data.json') // 加载本地数据文件
+var seller = appData.seller
+var goods = appData.goods
+var ratings = appData.ratings
+var apiRoutes = express.Router()  // 编写路由
+app.use('/api',apiRoutes) // 所有通过接口相关的 api 都会通过 api 这个路由导向到具体的路由
 
 const HOST = process.env.HOST
 const PORT = process.env.PORT && Number(process.env.PORT)
@@ -42,6 +50,29 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     quiet: true, // necessary for FriendlyErrorsPlugin
     watchOptions: {
       poll: config.dev.poll,
+    },
+    before (app) {
+      app.get('/api/seller', function (req, res) {
+        // 服务端收到请求后返回给客户端一个json 数据
+        res.json({
+          // 当我们数据正常时,传递 error 字符为0表示正常
+          error: 0,
+          // 返回 json 中的卖家数据
+          data: seller
+        })
+      })
+      app.get('/api/goods', function (req, res) {
+        res.json({
+          error: 0,
+          data: goods
+        })
+      })
+      app.get('/api/ratings', function (req, res) {
+        res.json({
+          error: 0,
+          data: ratings
+        })
+      })
     }
   },
   plugins: [
